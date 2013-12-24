@@ -1,43 +1,28 @@
 <#
-
 .SYNOPSIS
-
 Stacks csv/tsv input by frequency of occurence. Header and delimiter may be passed as arguments.
-
-
 .DESCRIPTION
-
 Get-Stack.ps1 takes a separated values input file, the user may specify the delimiter and header just
 as with import-csv, if not specified csv is assumed with the first row assumed to be the header row. 
 The user specifies the fields by which to stack the data, defaulting in ascending order, creating a 
 table where less frequently occuring items bubble up, if mutliple fields are provided as an argument,
 those fields in combination will be paired or tupled.
-
 .PARAMETER Path
 Specifies the path to the separated values file.
-
 .PARAMETER Delimiter
 Specifies the single character delimiter.
-
 .PARAMETER Header
 Specifies header values for the delimited file.
-
 .PARAMETER Asc
 Specifies output should be in ascending order, default.
-
 .PARAMETER Desc
 Specifies output should be in descending order.
-
 .PARAMETER Key
 Data should be sorted by the key.
-
 .PARAMETER Value
 Data should be sorted by the value.
-
 .EXAMPLE
-
 Get-Stack -Path .\autouns.tsv -delimiter "`t" -Asc -Key
-
 #>
 
 Param(
@@ -57,7 +42,21 @@ Param(
         [switch]$Value
 )
 
+function Get-Delimiter {
+<#
+.SYNOPSIS
+Determines what delimiter was provided, if none, returns comma
+.PARAMETER Delimiter
+Specifies the single character delimiter.
+#>
+Param(
+    [Parameter(Mandatory=$False)]
+        [char]$Delimiter=","
+)
+    $Delimiter
+}
 
+Get-Delimiter $Delimiter
 <# 
 $data = import-csv -delimiter "`t" $file
 

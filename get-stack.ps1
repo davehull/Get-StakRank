@@ -4,6 +4,7 @@
 
 Stacks csv/tsv input by frequency of occurence. Header and delimiter may be passed as arguments.
 
+
 .DESCRIPTION
 
 Get-Stack.ps1 takes a separated values input file, the user may specify the delimiter and header just
@@ -39,7 +40,22 @@ Get-Stack -Path .\autouns.tsv -delimiter "`t" -Asc -Key
 
 #>
 
-Param([string]$file)
+Param(
+    [Parameter(Mandatory=$True,Position=1)]
+        [string]$Path,
+    [Parameter(Mandatory=$False,Position=2)]
+        [char]$Delimiter=",",
+    [Parameter(Mandatory=$False,Position=3)]
+        [string]$Header,
+    [Parameter(Mandatory=$False,Position=4)]
+        [switch]$Asc,
+    [Parameter(Mandatory=$False,Position=5)]
+        [switch]$Desc,
+    [Parameter(Mandatory=$False,Position=6)]
+        [switch]$Key,
+    [Parameter(Mandatory=$False,Position=7)]
+        [switch]$Value
+)
 
 
 <# 

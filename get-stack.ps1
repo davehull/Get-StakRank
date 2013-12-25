@@ -9,6 +9,8 @@ table where less frequently occuring items bubble up, if mutliple fields are pro
 those fields in combination will be paired or tupled.
 .PARAMETER Path
 Specifies the path to the separated values file.
+.PARAMETER LiteralPath
+Specifies the literal path to the separated values file.
 .PARAMETER Delimiter
 Specifies the single character delimiter.
 .PARAMETER Header
@@ -21,42 +23,76 @@ Specifies output should be in descending order.
 Data should be sorted by the key.
 .PARAMETER Value
 Data should be sorted by the value.
+.PARAMETER Fields
+Specifies the field or fields to rank.
 .EXAMPLE
 Get-Stack -Path .\autouns.tsv -delimiter "`t" -Asc -Key
 #>
 
+[CmdletBinding()]
 Param(
-    [Parameter(Mandatory=$True,Position=1)]
+    [Parameter(ParameterSetName='Path',Mandatory=$True,Position=0)]
         [string]$Path,
-    [Parameter(Mandatory=$False,Position=2)]
+    [Parameter(ParameterSetName='LitPath',Mandatory=$True,Position=0)]
+        [string]$LiteralPath,
+    [Parameter(Mandatory=$False)]
         [char]$Delimiter=",",
-    [Parameter(Mandatory=$False,Position=3)]
+    [Parameter(Mandatory=$False)]
         [string]$Header,
-    [Parameter(Mandatory=$False,Position=4)]
-        [switch]$Asc,
-    [Parameter(Mandatory=$False,Position=5)]
-        [switch]$Desc,
-    [Parameter(Mandatory=$False,Position=6)]
-        [switch]$Key,
-    [Parameter(Mandatory=$False,Position=7)]
-        [switch]$Value
+    [Parameter(Mandatory=$False)]
+        [switch]$Desc=$False,
+    [Parameter(Mandatory=$False)]
+        [switch]$Key=$False,
+    [Parameter(Mandatory=$True)]
+        [array]$fields
 )
 
-function Get-Delimiter {
+function Get-Data {
 <#
 .SYNOPSIS
-Determines what delimiter was provided, if none, returns comma
+Open delimite file, read into variable, return variable
+.PARAMETER Path
+Specifies the full path to the input file
 .PARAMETER Delimiter
-Specifies the single character delimiter.
+Specifies the delimiter for the input file
+.PARAMETER Header
+Specifies the header for the input file, if none, first line of file is used
 #>
 Param(
-    [Parameter(Mandatory=$False)]
-        [char]$Delimiter=","
+    [Parameter(ParameterSetname='path',Mandatory=$True,Position=0)]
+        [string]$Path,
+    [Parameter(ParameterSetname='litpath',Mandatory=$True,Position=0)]
+        [string]$LiteralPath,
+    [Parameter(Mandatory=$False,Position=1)]
+        [char]$Delimiter=",",
+    [Parameter(Mandatory=$False,Position=2)]
+        [string]$Header
 )
-    $Delimiter
+    if ($Header.Length -gt 0) {
+        try {
+            import-csv -Path $Path -Delimiter $Delimiter -Header $Header
+        } catch {}
+    }
+
+
 }
 
-Get-Delimiter $Delimiter
+switch ($PSCmdlet.ParameterSetName) {
+    Path { 
+        if ($Header.Length -gt 0) {
+            $data = get-data -Path $Path -Delimiter $Delimiter -Header $Header
+        } else {
+            $data = get-data -Path $Path -Delimiter $Delimiter
+        }
+    }
+    LitPath {
+        if ($header.Length -gt 0) {
+            $data = get-data -Path $Path -Delimiter $Delimiter -Header $Header
+        } else {
+            $data = get-data -Path $Path -Delimiter $Delimiter
+        }
+    }
+
 <# 
 $data = import-csv -delimiter "`t" $file
 

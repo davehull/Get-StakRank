@@ -69,3 +69,50 @@ switch ($PSCmdlet.ParameterSetName) {
         }
     }
 }
+
+function Missing-Fields {
+<#
+.SYNOPSIS
+Verifies the user supplied fields are found in the input file.
+Returns list of missing fields or $
+#>
+Param(
+    [Parameter(Mandatory=$True,Position=0)]
+        [PSCustomObject]$Data,
+    [Parameter(Mandatory=$True,Position=1)]
+        [Array]$Fields
+)
+    $fileFields = $missingFields = @()
+    $fileFields = $data | get-member | ? { $_.MemberType -eq "NoteProperty" } | Select Name
+    foreach($Field in $Fields) {
+        if ($fileFields.name -notcontains $Field) {
+            $missingFields += $Field
+        }
+    }
+    if ($missingFields.Length -gt 1) {
+        Write-Host "[+] Error: User supplied fields, " + ($missingFields -join ", ") + ", were not found."
+        exit
+    } elseif ($missingFields.Length -eq 1) {
+        Write-Host "[+] Error: User supplied field, $missingFields, was not found."
+        exit
+    }
+}
+
+Missing-Fields $Data $Fields
+Write-Debug "[*] User supplied fields, $Fields, found in input file."
+
+<#
+$stackDict = @{}
+
+$Data | ? { $_.FailureReason -eq "" } | % { $fieldValue = $_.$field + "`t" + $_.LogonType + "`t" +$_.SubjectUserName
+    if ($stack.containskey($fieldValue)) {
+        $stack.set_item($fieldValue, $stack.get_item($fieldValue) + 1)
+    } else {
+        $stack.add($fieldValue, 1)
+    }
+}
+
+$data_out = $stack.GetEnumerator() | sort-object value,key | % {[string]$_.value + "`t" + $_.key + "`r`n"}
+
+$data_out.trim()
+#> 

@@ -32,7 +32,7 @@ Specifies the field or fields to rank.
 .Parameter ShowFields
 Causes the script to return the field names.
 .EXAMPLE
-Get-Stack -Path .\autouns.tsv -delimiter "`t" -Asc -Key
+Get-StakRank -Path .\autouns.tsv -delimiter "`t" -Asc -Key
 #>
 
 [CmdletBinding()]

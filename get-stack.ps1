@@ -74,7 +74,8 @@ function Check-Fields {
 <#
 .SYNOPSIS
 Verifies the user supplied fields are found in the input file.
-Returns list of missing fields or $
+If user supplied fields are not found in input file header, an 
+error is written and the script exits.
 #>
 Param(
     [Parameter(Mandatory=$True,Position=0)]

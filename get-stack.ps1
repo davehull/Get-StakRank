@@ -70,7 +70,7 @@ switch ($PSCmdlet.ParameterSetName) {
     }
 }
 
-function Missing-Fields {
+function Check-Fields {
 <#
 .SYNOPSIS
 Verifies the user supplied fields are found in the input file.
@@ -90,15 +90,15 @@ Param(
         }
     }
     if ($missingFields.Length -gt 1) {
-        Write-Host "[+] Error: User supplied fields, " + ($missingFields -join ", ") + ", were not found."
+        Write-Error "[+] Error: User supplied fields, " + ($missingFields -join ", ") + ", were not found."
         exit
     } elseif ($missingFields.Length -eq 1) {
-        Write-Host "[+] Error: User supplied field, $missingFields, was not found."
+        Write-Error "[+] Error: User supplied field, $missingFields, was not found."
         exit
     }
 }
 
-Missing-Fields $Data $Fields
+Check-Fields $Data $Fields
 Write-Debug "[*] User supplied fields, $Fields, found in input file."
 
 <#
@@ -115,4 +115,4 @@ $Data | ? { $_.FailureReason -eq "" } | % { $fieldValue = $_.$field + "`t" + $_.
 $data_out = $stack.GetEnumerator() | sort-object value,key | % {[string]$_.value + "`t" + $_.key + "`r`n"}
 
 $data_out.trim()
-#> 
+#>

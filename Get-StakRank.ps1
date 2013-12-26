@@ -32,7 +32,7 @@ Specifies the field or fields to rank.
 .Parameter ShowFields
 Causes the script to return the field names.
 .EXAMPLE
-Get-StakRank -Path .\autouns.tsv -delimiter "`t" -Asc -Key
+Get-Stack -Path .\autouns.tsv -delimiter "`t" -Asc -Key
 #>
 
 [CmdletBinding()]
@@ -53,18 +53,23 @@ Param(
         [array]$fields
 )
 
+Write-Verbose "How were we called..."
 switch ($PSCmdlet.ParameterSetName) {
     Path { 
         if ($Header.Length -gt 0) {
+            Write-Verbose "Calling Import-Csv -Path $Path -Delimiter $Delimiter -Header $Header..."
             $Data = Import-Csv -Path $Path -Delimiter $Delimiter -Header $Header
         } else {
+            Write-Verbose "Calling Import-Csv -Path $Path -Delimiter $Delimiter..."
             $Data = Import-Csv -Path $Path -Delimiter $Delimiter
         }
     }
     LitPath {
         if ($Header.Length -gt 0) {
+            Write-Verbose "Calling Import-Csv -LiteralPath $Path -Delimiter $Delimiter -Header $Header"
             $Data = Import-Csv -LiteralPath $Path -Delimiter $Delimiter -Header $Header
         } else {
+            Write-Verbose "Calling Import-Csv -LiteralPath $Path -Delimiter $Delimiter"
             $Data = Import-Csv -LiteralPath $Path -Delimiter $Delimiter
         }
     }
@@ -84,17 +89,19 @@ Param(
         [Array]$Fields
 )
     $fileFields = $missingFields = @()
+    Write-Verbose "Attempting to get input file headers..."
     $fileFields = $data | get-member | ? { $_.MemberType -eq "NoteProperty" } | Select Name
+    Write-Verbose "Header row of input file: $($fileFields.name)"
     foreach($Field in $Fields) {
         if ($fileFields.name -notcontains $Field) {
             $missingFields += $Field
         }
     }
     if ($missingFields.Length -gt 1) {
-        Write-Error "[+] Error: User supplied fields, " + ($missingFields -join ", ") + ", were not found."
+        Write-Error "[+] Error: User supplied fields, " + ($missingFields -join ", ") + ", were not found in `n`t$($fileFields.name)"
         exit
     } elseif ($missingFields.Length -eq 1) {
-        Write-Error "[+] Error: User supplied field, $missingFields, was not found."
+        Write-Error "[+] Error: User supplied field, $missingFields, was not found in `n`t$($fileFields.name)"
         exit
     }
 }

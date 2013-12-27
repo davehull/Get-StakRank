@@ -53,7 +53,6 @@ Param(
         [array]$fields
 )
 
-Write-Verbose "How were we called..."
 switch ($PSCmdlet.ParameterSetName) {
     Path { 
         if ($Header.Length -gt 0) {

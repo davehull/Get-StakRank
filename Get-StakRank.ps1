@@ -44,7 +44,7 @@ Param(
     [Parameter(Mandatory=$False)]
         [switch]$Key=$False,
     [Parameter(Mandatory=$True)]
-        [array]$fields
+        [array]$Fields
 )
 
 <#
@@ -80,29 +80,34 @@ error is written and the script exits.
 #>
 Param(
     [Parameter(Mandatory=$True,Position=0)]
-        [PSCustomObject]$Data,
+        [Array]$FileFields,
     [Parameter(Mandatory=$True,Position=1)]
-        [Array]$Fields
+        [Array]$UserFields,
+    [Parameter(Mandatory=$True,Position=2)]
+        [Char]$Delimiter
 )
-    $FileFields = $MissingFields = @()
-    Write-Verbose "Attempting to get input file headers..."
-    $FileFields = $data | get-member | ? { $_.MemberType -eq "NoteProperty" } | Select Name
-    Write-Verbose "Header row of input file: $($FileFields.name)"
-    foreach($Field in $Fields) {
-        if ($FileFields.name -notcontains $Field) {
+    Write-Verbose "Entering $($MyInvocation.MyCommand)"
+    $MissingFields = @()
+    foreach($Field in $UserFields) {
+        Write-Debug "`$Field is $Field"
+        Write-Debug "`$FileFields is $($FileFields -join $Delimiter)"
+        if ($FileFields -notcontains $Field) {
             $MissingFields += $Field
         }
     }
     if ($MissingFields.Length -gt 1) {
-        Write-Error "[+] Error: User supplied fields, " + ($MissingFields -join ", ") + ", were not found in `n`t$($FileFields.name)"
+        Write-Error "[+] Error: User supplied fields, $($MissingFields -join ", "), were not found in `n`t$($FileFields -join $Delimiter)"
+        Write-Verbose "Exiting $($MyInvocation.MyCommand)"
         exit
     } elseif ($MissingFields.Length -eq 1) {
-        Write-Error "[+] Error: User supplied field, $MissingFields, was not found in `n`t$($FileFields.name)"
+        Write-Error "[+] Error: User supplied field, $MissingFields, was not found in `n`t$($FileFields -join $Delimiter)"
+        Write-Verbose "Exiting $($MyInvocation.MyCommand)"
         exit
     }
+    Write-Verbose "Exiting $($MyInvocation.MyCommand)"
 }
 
-function Get-FirstFile {
+function Get-FileHeader {
 <#
 .SYNOPSIS
 Get the header row from the first file in the list of files supplied by the user.
@@ -113,19 +118,33 @@ Param(
     [Parameter(Mandatory=$True,Position=1)]
         [char]$Delimiter
 )
-    Write-Verbose "Reading in one data file."
-    foreach($file in (ls -r $FileNamePattern)) {
-        $Data = Import-Csv $file -Delimiter $Delimiter
-        break
+    Write-Verbose "Entering $($MyInvocation.MyCommand)"
+    $Headr, $Files, $Fields = @()
+    Write-Verbose "Looking for files matching user supplied pattern, $FileNamePattern"
+    Write-Verbose "This process traverses subdirectories so it may take some time."
+    $Files += ls -r $FileNamePattern
+    if ($Files) {
+        Write-Verbose "File(s) matching pattern, ${FileNamePattern}:`n$($Files -join "`n")"
+        foreach($File in $Files) {
+            Write-Verbose "Attempting to extract input file headers from ${File}."
+            $HeaderRow = gc $File -TotalCount 1
+            $Fields = $HeaderRow -split $Delimiter
+            Write-Verbose "Extracted the following fields:`n$($Fields -join $Delimiter)"
+            break
+        }
+    } else {
+        Write-Error "No input files were found matching the user supplied pattern, $FileNamePattern."
+        exit
     }
-    $Data
+    $Fields
+    Write-Verbose "Exiting $($MyInvocation.MyCommand)"
 }
 
-$Data = Get-FirstFile $FileNamePattern $Delimiter
-Check-Fields $Data $Fields
+Write-Verbose "Starting up $($MyInvocation.MyCommand)"
+$InputFileHeader = Get-FileHeader $FileNamePattern $Delimiter
+Check-Fields $InputFileHeader $Fields $Delimiter
 Write-Debug "[*] User supplied fields, $Fields, found in input file."
-
-
+Write-Verbose "Exiting $($MyInvocation.MyCommand)"
 
 <#
 $stackDict = @{}

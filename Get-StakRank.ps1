@@ -166,11 +166,29 @@ Param(
     [Parameter(Mandatory=$False)]
         [boolean]$Key,
     [Parameter(Mandatory=$True)]
-        [array]$Fields        
+        [array]$Fields
+)        
 
-)
     Write-Verbose "Entering $($MyInvocation.MyCommand)"
-    
+    if ($Roles) {
+        Write-Verbose "We have roles..."
+        foreach ($Role in $Roles) {
+            Write-Verbose "Processing role ${Role}."
+            $InputData = @()
+            $Dict = @{}
+            $FilesInRole = $Files | ? { $_ -match $Role}
+            if ($FilesInRole) {
+                foreach ($File in $FilesInRole) {
+                    Write-Verbose "Reading ${File}."
+                    $InputData += Import-Csv -Path $File -Delimiter $Delimiter -Header $Header
+                }
+            } else {
+                Write-Verbose "No files found matching role, ${Role}."
+            }
+        }
+    } else {
+        Write-Verbose "We have no roles..."
+    }
 
     Write-Verbose "Exiting $($MyInvocation.MyCommand)"
 }

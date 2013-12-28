@@ -43,13 +43,13 @@ Param(
     [Parameter(Mandatory=$False)]
         [char]$Delimiter=",",
     [Parameter(Mandatory=$False)]
-        [string]$Header,
+        [string]$Header="",
     [Parameter(Mandatory=$False)]
         [switch]$Desc=$False,
     [Parameter(Mandatory=$False)]
         [switch]$Key=$False,
     [Parameter(Mandatory=$False)]
-        [string]$RoleFile,
+        [string]$RoleFile="",
     [Parameter(Mandatory=$True)]
         [array]$Fields
 )
@@ -136,7 +136,7 @@ Param(
 function Get-Roles {
 Param(
     [Parameter(Mandatory=$True,Position=0)]
-        $RoleFile
+        [string]$RoleFile
 )
     Write-Verbose "Entering $($MyInvocation.MyCommand)"
     if (Test-Path $RoleFile) {
@@ -154,14 +154,28 @@ Param(
 function Get-Rank {
 Param(
     [Parameter(Mandatory=$True,Position=0)]
-        [string]$Files
-)
-Write-Verbose "Entering $($MyInvocation.MyCommand)"
+        [array]$Files,
+    [Parameter(Mandatory=$True,Position=1)]
+        [char]$Delimiter,
+    [Parameter(Mandatory=$True,Position=2)]
+        [Array]$Header,
+    [Parameter(Mandatory=$False)]
+        [array]$Roles,
+    [Parameter(Mandatory=$False)]
+        [boolean]$Desc,
+    [Parameter(Mandatory=$False)]
+        [boolean]$Key,
+    [Parameter(Mandatory=$True)]
+        [array]$Fields        
 
-Write-Verbose "Exiting $($MyInvocation.MyCommand)"
+)
+    Write-Verbose "Entering $($MyInvocation.MyCommand)"
+    
+
+    Write-Verbose "Exiting $($MyInvocation.MyCommand)"
 }
 
-$Files = @()
+$Files, $Roles, $InputFileHeader = @()
 Write-Verbose "Starting up $($MyInvocation.MyCommand)"
 if ($RoleFile) {
     $Roles = Get-Roles $RoleFile
@@ -170,6 +184,7 @@ $Files = Get-Files $FileNamePattern
 $InputFileHeader = Get-FileHeader $Files[0] $Delimiter
 Check-Fields $InputFileHeader $Fields $Delimiter
 Write-Debug "User supplied fields, ${Fields}, found in input file."
+Get-Rank -Files $Files -Delimiter $Delimiter -Header $InputFileHeader -Roles $Roles -Desc $Desc -Key $Key -Fields $Fields
 Write-Verbose "Exiting $($MyInvocation.MyCommand)"
 
 <#

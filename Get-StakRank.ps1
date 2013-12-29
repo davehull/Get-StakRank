@@ -194,17 +194,26 @@ Param(
     [Parameter(Mandatory=$False)]
         [boolean]$Key,
     [Parameter(Mandatory=$True)]
-        [string]$FieldList
+        [Array]$Fields
 )        
 
     Write-Verbose "Entering $($MyInvocation.MyCommand)"
-
+    $FieldList = Get-FieldList $Fields
     if ($Roles) {
         Write-Verbose "We have roles..."
         $PrefixFieldList = "`$Element = `$Role + `"``t`" + "
         $PrefixFieldList += $FieldList
         $FieldList = $PrefixFieldList
-        $scriptblock = [scriptblock]::Create($FieldList)
+        $FieldList += {
+            if ($Dict.ContainsKey($Element)) {
+                Write-Verbose "Incrementing ${Element}."
+                $Dict.Set_Item($Element, $Dict.Get_Item($Element) + 1)
+            } else {
+                Write-Verbose "Adding ${Element}."
+                $Dict.add($Element, 1)
+            }
+        }
+        $Scriptblock = [scriptblock]::Create($FieldList)
         foreach ($Role in $Roles) {
             Write-Verbose "Processing role ${Role}."
             $InputData = @()
@@ -218,8 +227,16 @@ Param(
             } else {
                 Write-Verbose "No files found matching role, ${Role}."
             }
-            $InputData | % $scriptblock
-            $Element
+            Write-Verbose "Building dictionary of stack ranked elements for ${Role}."
+            $InputData | % $Scriptblock
+            <#Write-Verbose "Building dictionary of stack ranked elements."
+            if ($Dict.ContainsKey($Element)) {
+                Write-Verbose "Incrementing ${Element}."
+                $Dict.Set_Item($Element, $Dict.Get_Item($Element) + 1)
+            } else {
+                Write-Verbose "Adding ${Element}."
+                $Dict.add($Element, 1)
+            }#>
             
         }
     } else {
@@ -239,8 +256,7 @@ $Files = Get-Files $FileNamePattern
 $InputFileHeader = Get-FileHeader $Files[0] $Delimiter
 Check-Fields $InputFileHeader $Fields $Delimiter
 Write-Debug "User supplied fields, ${Fields}, found in input file."
-$FieldList = Get-FieldList $Fields
-Get-Rank -Files $Files -Delimiter $Delimiter -Header $InputFileHeader -Roles $Roles -Desc $Desc -Key $Key -FieldList $FieldList
+Get-Rank -Files $Files -Delimiter $Delimiter -Header $InputFileHeader -Roles $Roles -Desc $Desc -Key $Key -Fields $Fields
 Write-Verbose "Exiting $($MyInvocation.MyCommand)"
 
 <#

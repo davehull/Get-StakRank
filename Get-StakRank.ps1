@@ -179,6 +179,11 @@ Param(
 }
 
 function Get-Rank {
+<#
+.SYNOPSIS
+The heart of the script where the actual ranking of the data happens. I'm looking for way to refactor and improve
+readability and performance.
+#>
 Param(
     [Parameter(Mandatory=$True,Position=0)]
         [array]$Files,
@@ -235,9 +240,9 @@ Param(
         $Output = $Outheader += $Output
         $FieldsFileName = $Fields -join "-"
         if ($Role) {
-            $Output | Set-Content -Encoding Ascii $Role-$FieldsFileName.tsv
+            $Output | Set-Content -Encoding Ascii ${Role}-${FieldsFileName}.tsv
         } else {
-            $Output | Set-Content -Encoding Ascii $FieldsFileName.tsv
+            $Output | Set-Content -Encoding Ascii ${FieldsFileName}.tsv
         }
     }
 

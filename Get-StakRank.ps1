@@ -7,7 +7,7 @@ Get-StakRank.ps1 parses multiple separated values input files, the user may spec
 header just as with import-csv, if not specified csv is assumed with the first row assumed to be the 
 header row. The user specifies the fields by which to stack the data, defaulting in ascending order, 
 creating a table where less frequently occuring items bubble up, if mutliple fields are provided as 
-an argument, those fields in combination will be ranked in combination.
+an argument, those fields will be ranked in combination.
 
 If you don't know the fields and you're frequently working with various separated values files, 
 https://github.com/davehull/Get-Fields.ps1, may be useful, alternatively, providing incorrect fields
@@ -27,7 +27,8 @@ Specifies output should be in descending order.
 .PARAMETER Key
 Data should be sorted by the key.
 .PARAMETER Value
-Data should be sorted by the value, this is the default.
+Data should be sorted by the value, this is the default. The values sorted by are the
+elements supplied by the user via the Fields argument.
 .PARAMETER Roles
 Output should be ranked by roles -- assumes input file names contain some role identifier.
 .PARAMETER Fields
@@ -101,10 +102,9 @@ Param(
         [String]$FileNamePattern
 )
     Write-Verbose "Entering $($MyInvocation.MyCommand)"
-    $Files = @()
     Write-Verbose "Looking for files matching user supplied pattern, $FileNamePattern"
     Write-Verbose "This process traverses subdirectories so it may take some time."
-    $Files += ls -r $FileNamePattern | % { $_.FullName }
+    $Files = @(ls -r $FileNamePattern | % { $_.FullName })
     if ($Files) {
         Write-Verbose "File(s) matching pattern, ${FileNamePattern}:`n$($Files -join "`n")"
         $Files
@@ -128,16 +128,21 @@ Param(
         [char]$Delimiter
 )
     Write-Verbose "Entering $($MyInvocation.MyCommand)"
-    $Headr, $Fields = @()
+    $Fields = @()
     Write-Verbose "Attempting to extract input file headers from ${File}."
     $HeaderRow = gc $File -TotalCount 1
-    $Fields = $HeaderRow -split $Delimiter
+    $Fields = @($HeaderRow -split $Delimiter)
     Write-Verbose "Extracted the following fields: $($Fields -join $Delimiter)"
     $Fields
     Write-Verbose "Exiting $($MyInvocation.MyCommand)"
 }
 
 function Get-Roles {
+<#
+.SYNOPSIS
+Reads roles from a text file, one role per line. Think of roles as smart name elements 
+common to specific groups of things (i.e. computernames from HR dept. containing "HR")
+#>
 Param(
     [Parameter(Mandatory=$True,Position=0)]
         [string]$RoleFile
@@ -165,7 +170,6 @@ Param(
         [array]$Fields
 )
     Write-Verbose "Entering $($MyInvocation.MyCommand)"
-    $FieldList = ""
     $FieldList = $Fields -join "`" + `"``t`" + `$_.`""
     $FieldList += "`""
     $FieldList = "`$_.`"" + $FieldList
@@ -191,23 +195,55 @@ Param(
     [Parameter(Mandatory=$True)]
         [Array]$Fields
 )        
-
     Write-Verbose "Entering $($MyInvocation.MyCommand)"
     $FieldList = Get-FieldList $Fields
+
+    $DictScriptblock = {
+        if ($Dict.ContainsKey($Element)) {
+            Write-Verbose "Incrementing ${Element}."
+            $Dict.Set_Item($Element, $Dict.Get_Item($Element) + 1)
+        } else {
+            Write-Verbose "Adding ${Element}."
+            $Dict.add($Element, 1)
+        }
+    }
+
+    $OutScriptblock = {
+    Param(
+        [Parameter(Mandatory=$True)]
+            [string]$Output
+    )
+        $Output += $Fields -join "`t"
+        $Output += "`r`n"
+        if ($Key) {
+            Write-Verbose "Writing out by key."
+            if ($Desc) {
+                $Output += $Dict.GetEnumerator() | Sort-Object -Desc key,value | % {[string]$_.Value + "`t" + $_.Key + "`r`n"}
+            } else {
+                $Output += $Dict.GetEnumerator() | Sort-Object key,value | % {[string]$_.Value + "`t" + $_.Key + "`r`n"}
+            }
+        } else {
+            Write-Verbose "Writing out by value."
+            if ($Desc) {
+                $Output += $Dict.GetEnumerator() | Sort-Object -Desc value,key | % {[string]$_.Value + "`t" + $_.Key + "`r`n"}
+            } else {
+                $Output += $Dict.GetEnumerator() | Sort-Object value,key | % {[string]$_.value + "`t" + $_.key + "`r`n"}
+            }
+        }
+        $FieldsFileName = $Fields -join "-"
+        if ($Role) {
+            $Output | Set-Content -Encoding Ascii $Role-$FieldsFileName.tsv
+        } else {
+            $Output | Set-Content -Encoding Ascii $FieldsFileName.tsv
+        }
+    }
+
     if ($Roles) {
         Write-Verbose "We have roles..."
         $PrefixFieldList = "`$Element = `$Role + `"``t`" + "
         $PrefixFieldList += $FieldList
         $FieldList = $PrefixFieldList
-        $FieldList += {
-            if ($Dict.ContainsKey($Element)) {
-                Write-Verbose "Incrementing ${Element}."
-                $Dict.Set_Item($Element, $Dict.Get_Item($Element) + 1)
-            } else {
-                Write-Verbose "Adding ${Element}."
-                $Dict.add($Element, 1)
-            }
-        }
+        $FieldList += $DictScriptblock
         $Scriptblock = [scriptblock]::Create($FieldList)
         foreach ($Role in $Roles) {
             Write-Verbose "Processing role ${Role}."
@@ -225,23 +261,28 @@ Param(
             }
             Write-Verbose "Building dictionary of stack ranked elements for ${Role}."
             $InputData | % $Scriptblock
-            $Output = "Count`t"
-            $Output += $Fields -join "`t"
-            $Output += "`r`n"
-            if ($Key) {
-                Write-Verbose "Writing out by key."
-                $Output += $Dict.GetEnumerator() | Sort-Object key,value | % {[string]$_.Value + "`t" + $_.Key + "`r`n"}
-            } else {
-                Write-Verbose "Writing out by value."
-                $Output += $Dict.GetEnumerator() | Sort-Object value,key | % {[string]$_.value + "`t" + $_.key + "`r`n"}
-            }
-            $FieldsFileName = $Fields -join "-"
-            $Output | Set-Content -Encoding Ascii $Role-$FieldsFileName.tsv
+            $Output = "Count`tRole`t"
+            & $OutScriptblock -Output $Output
         }
     } else {
         Write-Verbose "We have no roles..."
+        $PrefixFieldList = "`$Element = `"``t`" + "
+        $PrefixFieldList += $FieldList
+        $FieldList = $PrefixFieldList
+        $FieldList += $DictScriptblock
+        $Scriptblock = [scriptblock]::Create($FieldList)
+        Write-Verbose "Processing all up."
+        $InputData = @()
+        $Dict = @{}
+        foreach($File in $Files) {
+            Write-Verbose "Reading ${File}."
+            $InputData += Import-Csv -Path $File -Delimiter $Delimiter -Header $Header
+        }
+        Write-Verbose "Building dictionary of stack ranked elements all up."
+        $InputData | % $Scriptblock
+        $Output = "Count`t"
+        & $OutScriptblock -Output $Output
     }
-
     Write-Verbose "Exiting $($MyInvocation.MyCommand)"
 }
 
@@ -249,10 +290,10 @@ $Files, $Roles, $InputFileHeader = @()
 $FieldList = ""
 Write-Verbose "Starting up $($MyInvocation.MyCommand)"
 if ($RoleFile) {
-    $Roles = Get-Roles $RoleFile
+    $Roles = @(Get-Roles $RoleFile)
 }
-$Files = Get-Files $FileNamePattern
-$InputFileHeader = Get-FileHeader $Files[0] $Delimiter
+$Files = @(Get-Files $FileNamePattern)
+$InputFileHeader = @(Get-FileHeader $Files[0] $Delimiter)
 Check-Fields $InputFileHeader $Fields $Delimiter
 Write-Debug "User supplied fields, ${Fields}, found in input file."
 Get-Rank -Files $Files -Delimiter $Delimiter -Header $InputFileHeader -Roles $Roles -Desc $Desc -Key $Key -Fields $Fields

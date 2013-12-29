@@ -166,14 +166,9 @@ Param(
 )
     Write-Verbose "Entering $($MyInvocation.MyCommand)"
     $FieldList = ""
-    # foreach($Item in $Fields) {
     $FieldList = $Fields -join "`" + `"``t`" + `$_.`""
     $FieldList += "`""
     $FieldList = "`$_.`"" + $FieldList
-    <#
-        $FieldList += "`"``t`" + `$_.`"$Item`""
-    }
-    #>
     Write-Verbose "`$FieldList is ${FieldList}."
     $FieldList
     Write-Verbose "Exiting $($MyInvocation.MyCommand)"
@@ -225,12 +220,23 @@ Param(
                     $InputData += Import-Csv -Path $File -Delimiter $Delimiter -Header $Header
                 }
             } else {
-                Write-Verbose "No files found matching role, ${Role}."
-                Start-Sleep 7
+                Write-Verbose "No files found matching role, ${Role}. Continuing."
                 Continue
             }
             Write-Verbose "Building dictionary of stack ranked elements for ${Role}."
-            $InputData | % $Scriptblock            
+            $InputData | % $Scriptblock
+            $Output = "Count`t"
+            $Output += $Fields -join "`t"
+            $Output += "`r`n"
+            if ($Key) {
+                Write-Verbose "Writing out by key."
+                $Output += $Dict.GetEnumerator() | Sort-Object key,value | % {[string]$_.Value + "`t" + $_.Key + "`r`n"}
+            } else {
+                Write-Verbose "Writing out by value."
+                $Output += $Dict.GetEnumerator() | Sort-Object value,key | % {[string]$_.value + "`t" + $_.key + "`r`n"}
+            }
+            $FieldsFileName = $Fields -join "-"
+            $Output | Set-Content -Encoding Ascii $Role-$FieldsFileName.tsv
         }
     } else {
         Write-Verbose "We have no roles..."
@@ -251,19 +257,3 @@ Check-Fields $InputFileHeader $Fields $Delimiter
 Write-Debug "User supplied fields, ${Fields}, found in input file."
 Get-Rank -Files $Files -Delimiter $Delimiter -Header $InputFileHeader -Roles $Roles -Desc $Desc -Key $Key -Fields $Fields
 Write-Verbose "Exiting $($MyInvocation.MyCommand)"
-
-<#
-$stackDict = @{}
-
-$Data | ? { $_.FailureReason -eq "" } | % { $fieldValue = $_.$field + "`t" + $_.LogonType + "`t" +$_.SubjectUserName
-    if ($stack.containskey($fieldValue)) {
-        $stack.set_item($fieldValue, $stack.get_item($fieldValue) + 1)
-    } else {
-        $stack.add($fieldValue, 1)
-    }
-}
-
-$data_out = $stack.GetEnumerator() | sort-object value,key | % {[string]$_.value + "`t" + $_.key + "`r`n"}
-
-$data_out.trim()
-#>

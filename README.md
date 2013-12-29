@@ -26,7 +26,7 @@ You create a script that uses Sysinternals Autorunsc.exe to collect all ASEPs fr
 ```Powershell
 & \\hunter\tools\autorunsc.exe -a -v -f -c '*' > \\hunter\data\$env:computername.autoruns.csv
 ```
-You orchestrate this collection in whatever way you can, SCCM, Powershell Remoting, PSExec, GPO push, etc. Maybe your organization is large and highly geographically distributed and collection takes a week or two. The result is a pile of data in the \\hunter\data share, maybe hundreds, thousands, tens or hundreds of thousands of csv files listing every Autorun for every system in your organization.
+You orchestrate this collection in whatever way you can, SCCM, Powershell Remoting, PSExec, GPO push, etc. Maybe your organization is large and highly geographically distributed and collection takes a week or two. The result is a pile of data in the \\\hunter\data share, maybe hundreds, thousands, tens or hundreds of thousands of csv files listing every Autorun for every system in your organization.
 
 You can now use Get-Stakrank to perform frequency analysis of this data and help you find follow up items that may warrant further investigation. Since our scenario involves an organization that uses smart system naming conventions, you can use that to your advantage and sort the data by system role. You do this by putting the role identifiers in a text file, one per line and saving that file to disk, maybe call it roles.txt.
 
@@ -101,6 +101,6 @@ VERBOSE: Writing out by value.
 VERBOSE: Exiting Get-Rank
 VERBOSE: Exiting Get-StakRank.ps1
 ```
-When the script completes, you're left with one tsv file summarizing the frequency of each Autorun for each role based on the -Fields you provided. Of course, if you run the script without the -RolesFile option because you don't have a naming convention you can rely on, you'll end up with a single tsv file summarizing the frequency of each Autorun across all the systems for which you have collected data.
+When the script completes, you're left with one tsv file (per role in the role scenario) summarizing the frequency of each Autorun for each of the -Fields you provided. Of course, if you run the script without the -RolesFile option because you don't have a naming convention you can rely on, you'll end up with a single tsv file summarizing the frequency of each Autorun across all the systems for which you have collected data.
 
 Get-Stakrank is not limited to frequency analysis of Autoruns output. It should be applicable for any collection of separated values files.

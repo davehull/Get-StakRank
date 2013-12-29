@@ -209,12 +209,14 @@ Param(
     }
 
     $OutScriptblock = {
-    Param(
-        [Parameter(Mandatory=$True)]
-            [string]$Output
-    )
-        $Output += $Fields -join "`t"
-        $Output += "`r`n"
+        if ($Role) {
+            $Outheader = "Count`tRole`t"
+        } else {
+            $Outheader = "Count`t"
+        }
+        $Outheader += $Fields -join "`t"
+        $Outheader += "`r`n"
+        $Output = ""
         if ($Key) {
             Write-Verbose "Writing out by key."
             if ($Desc) {
@@ -230,6 +232,7 @@ Param(
                 $Output += $Dict.GetEnumerator() | Sort-Object value,key | % {[string]$_.value + "`t" + $_.key + "`r`n"}
             }
         }
+        $Output = $Outheader += $Output
         $FieldsFileName = $Fields -join "-"
         if ($Role) {
             $Output | Set-Content -Encoding Ascii $Role-$FieldsFileName.tsv
@@ -261,8 +264,7 @@ Param(
             }
             Write-Verbose "Building dictionary of stack ranked elements for ${Role}."
             $InputData | % $Scriptblock
-            $Output = "Count`tRole`t"
-            & $OutScriptblock -Output $Output
+            & $OutScriptblock
         }
     } else {
         Write-Verbose "We have no roles..."
@@ -280,8 +282,7 @@ Param(
         }
         Write-Verbose "Building dictionary of stack ranked elements all up."
         $InputData | % $Scriptblock
-        $Output = "Count`t"
-        & $OutScriptblock -Output $Output
+        & $OutScriptblock
     }
     Write-Verbose "Exiting $($MyInvocation.MyCommand)"
 }

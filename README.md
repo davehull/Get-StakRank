@@ -1,2 +1,7 @@
-get-stackrank
+Get-Stakrank
 =============
+Get-Stakrank came out of the need to parse hundreds, thousands, tens of thousands... of csv files containging various kinds of data collected from distributed computer systems. Consider csv output from tools like Sysinternals autorunsc.exe, sigcheck.exe, or the native Windows tasklist.exe with loaded modules, collected from many hosts during the process of hunting for indications of compromise in large distributed networks. Many attackers want to maintain persistence in environments and there are a variety of means for accomplishing this from credential harvesting, to planting code on the host. If the attacker plants code on a small number of hosts, small being a relative term given the overall environment size, stack ranking the frequency of occurrence for a given autorun, process or loaded module can be a useful lead generation tool for investigators.
+
+For more on the idea of stack ranking as a means of hunting evil, check out Mandiant's post, "An In-Depth Look Into Data Stacking," here: https://www.mandiant.com/blog/indepth-data-stacking/.
+
+One of the capability goals for the script was to be able to process any separated values file. This is an early release and has been through limited testing. If you find bugs, I'm sure there will be some, please use the Issues function in github and let me know about it. I'll do what I can to fix it, or if you're ambitious, fork the repo and fix it yourself.

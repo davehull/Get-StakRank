@@ -91,6 +91,11 @@ Param(
 }
 
 function Get-Files {
+<#
+.SYNOPSIS
+Returns the list of input files matching the user supplied file name pattern.
+Traverses subdirectories.
+#>
 Param(
     [Parameter(Mandatory=$True,Position=0)]
         [String]$FileNamePattern
@@ -110,7 +115,6 @@ Param(
     }
     Write-Verbose "Exiting $($MyInvocation.MyCommand)"
 }
-
 
 function Get-FileHeader {
 <#
@@ -151,6 +155,30 @@ Param(
     Write-Verbose "Exiting $($MyInvocation.MyCommand)"
 }
 
+function Get-FieldList {
+<#
+.SYNOPSIS
+Returns the user supplied fields as a scriptblock to be used in the ranking.
+#>
+Param(
+    [Parameter(Mandatory=$True,Position=0)]
+        [array]$Fields
+)
+    Write-Verbose "Entering $($MyInvocation.MyCommand)"
+    $FieldList = ""
+    # foreach($Item in $Fields) {
+    $FieldList = $Fields -join "`" + `"``t`" + `$_.`""
+    $FieldList += "`""
+    $FieldList = "`$_.`"" + $FieldList
+    <#
+        $FieldList += "`"``t`" + `$_.`"$Item`""
+    }
+    #>
+    Write-Verbose "`$FieldList is ${FieldList}."
+    $FieldList
+    Write-Verbose "Exiting $($MyInvocation.MyCommand)"
+}
+
 function Get-Rank {
 Param(
     [Parameter(Mandatory=$True,Position=0)]
@@ -166,12 +194,17 @@ Param(
     [Parameter(Mandatory=$False)]
         [boolean]$Key,
     [Parameter(Mandatory=$True)]
-        [array]$Fields
+        [string]$FieldList
 )        
 
     Write-Verbose "Entering $($MyInvocation.MyCommand)"
+
     if ($Roles) {
         Write-Verbose "We have roles..."
+        $PrefixFieldList = "`$Element = `$Role + `"``t`" + "
+        $PrefixFieldList += $FieldList
+        $FieldList = $PrefixFieldList
+        $scriptblock = [scriptblock]::Create($FieldList)
         foreach ($Role in $Roles) {
             Write-Verbose "Processing role ${Role}."
             $InputData = @()
@@ -185,6 +218,9 @@ Param(
             } else {
                 Write-Verbose "No files found matching role, ${Role}."
             }
+            $InputData | % $scriptblock
+            $Element
+            
         }
     } else {
         Write-Verbose "We have no roles..."
@@ -194,6 +230,7 @@ Param(
 }
 
 $Files, $Roles, $InputFileHeader = @()
+$FieldList = ""
 Write-Verbose "Starting up $($MyInvocation.MyCommand)"
 if ($RoleFile) {
     $Roles = Get-Roles $RoleFile
@@ -202,7 +239,8 @@ $Files = Get-Files $FileNamePattern
 $InputFileHeader = Get-FileHeader $Files[0] $Delimiter
 Check-Fields $InputFileHeader $Fields $Delimiter
 Write-Debug "User supplied fields, ${Fields}, found in input file."
-Get-Rank -Files $Files -Delimiter $Delimiter -Header $InputFileHeader -Roles $Roles -Desc $Desc -Key $Key -Fields $Fields
+$FieldList = Get-FieldList $Fields
+Get-Rank -Files $Files -Delimiter $Delimiter -Header $InputFileHeader -Roles $Roles -Desc $Desc -Key $Key -FieldList $FieldList
 Write-Verbose "Exiting $($MyInvocation.MyCommand)"
 
 <#

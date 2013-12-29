@@ -23,7 +23,7 @@ A sample listing of hostnames for each environment might look like the following
 Knowing your organization's smart naming convention, allows you to sort data and make comparisons within each role. Say for example it's common for your R&amp;D folks to have certain software development tools installed on their systems, but outside of that role, it's relatively uncommon. You will likely find intra-role commonalities within each division. Your Finance team will likely have software packages installed that are unique to their role. Of course, if your organization doesn't use such naming conventions, you can still collect the data and analyze it all up, without regard to role, but being able to sort it out by role has the advantage of helping you spot a malicious process on an IT machine that an attacker has named to resemble a process common to Finance machines.
 
 You create a script that uses Sysinternals Autorunsc.exe to collect all ASEPs from every profile on every host, complete with MD5, SHA1 and SHA256 hashes of each ASEP file and write the output to csv files that include the name of each host the data came from, very roughly, something like the following executed on every host:<br />
-```
+```Powershell
 & \\hunter\tools\autorunsc.exe -a -v -f -c '*' > \\hunter\data\$env:computername.autoruns.csv
 ```
 You orchestrate this collection in whatever way you can, SCCM, Powershell Remoting, PSExec, GPO push, etc. Maybe your organization is large and highly geographically distributed and collection takes a week or two. The result is a pile of data in the \\hunter\data share, maybe hundreds, thousands, tens or hundreds of thousands of csv files listing every Autorun for every system in your organization.
@@ -31,7 +31,7 @@ You orchestrate this collection in whatever way you can, SCCM, Powershell Remoti
 You can now use Get-Stakrank to perform frequency analysis of this data and help you find follow up items that may warrant further investigation. Since our scenario involves an organization that uses smart system naming conventions, you can use that to your advantage and sort the data by system role. You do this by putting the role identifiers in a text file, one per line and saving that file to disk, maybe call it roles.txt.
 
 You then call Get-Stakrank.ps1 from within the directory (or a parent directory) where your collected Autoruns data is, as follows:<br />
-```
+```Powershell
 .\Get-Stakrank -FileNamePattern *autoruns.csv -RoleFile .\roles.txt -Fields MD5, "Image Path"
 ```
 Where did the -Fields arguments come from? Those are fields in the Autoruns output that you're using to stack rank the data, you can choose whatever fields you want, so long as they are present in the input file's header or match the user supplied header, which can be passed as an argument. If you run the command as shown above, depending on the size of your data collection, it may run for a few seconds, or for hours, the script, as run above, provides no feedback as to its progress, for that you may want to run it with the -Verbose flag. When run with the -Verbose flag, you may see something like the following:<br />

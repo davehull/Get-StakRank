@@ -23,7 +23,7 @@ Specifies header values for the delimited file.
 .PARAMETER Asc
 Specifies output should be in ascending order, default.
 .PARAMETER Desc
-Specifies output should be in descending order.
+Specifies output should be in descending order. Ascending is default.
 .PARAMETER Key
 Data should be sorted by the key.
 .PARAMETER Value
@@ -34,7 +34,7 @@ Output should be ranked by roles -- assumes input file names contain some role i
 .PARAMETER Fields
 Specifies the field or fields to rank.
 .EXAMPLE
-Get-StakRank -FileNamePattern .\*.autoruns.tsv -delimiter "`t" -Asc -Key -Fields MD5, "Image Path"
+Get-StakRank -FileNamePattern .\CADataCenter\*autoruns.csv -Roles .\CADataCenter\ServerRoles.txt -Fields MD5, "Image Path"
 #>
 
 [CmdletBinding()]

@@ -13,12 +13,12 @@ Your IT group uses smart naming conventions for computers in your organization t
 
 A sample listing of hostnames for each environment might look like the following:<br />
 ```
-534AZMKTG -- a Sales &amp; Marketing host<br />
-277AARND  -- a R&amp;D host<br />
-182AROPS  -- an Operations host<br />
-011AHRES  -- a HR host<br />
-1040EZFIN -- a Finance host<br />
-1337INFO  -- a host from IT<br />
+534AZMKTG -- a Sales & Marketing host
+277AARND  -- a R&D host
+182AROPS  -- an Operations host
+011AHRES  -- a HR host
+1040EZFIN -- a Finance host
+1337INFO  -- a host from IT
 ```
 Knowing your organization's smart naming convention, allows you to sort data and make comparisons within each role. Say for example it's common for your R&amp;D folks to have certain software development tools installed on their systems, but outside of that role, it's relatively uncommon. You will likely find intra-role commonalities within each division. Your Finance team will likely have software packages installed that are unique to their role. Of course, if your organization doesn't use such naming conventions, you can still collect the data and analyze it all up, without regard to role, but being able to sort it out by role has the advantage of helping you spot a malicious process on an IT machine that an attacker has named to resemble a process common to Finance machines.
 

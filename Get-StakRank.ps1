@@ -242,7 +242,7 @@ Param(
         if ($Role) {
             $Output | Set-Content -Encoding Ascii ${Role}-${FieldsFileName}.tsv
         } else {
-            $Output | Set-Content -Encoding Ascii ${FieldsFileName}.tsv
+            $Output | Set-Content -Encoding Ascii -Path $(${FieldsFileName} + ".tsv")
         }
     }
 

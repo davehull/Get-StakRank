@@ -226,18 +226,11 @@ Param(
                 }
             } else {
                 Write-Verbose "No files found matching role, ${Role}."
+                Start-Sleep 7
+                Continue
             }
             Write-Verbose "Building dictionary of stack ranked elements for ${Role}."
-            $InputData | % $Scriptblock
-            <#Write-Verbose "Building dictionary of stack ranked elements."
-            if ($Dict.ContainsKey($Element)) {
-                Write-Verbose "Incrementing ${Element}."
-                $Dict.Set_Item($Element, $Dict.Get_Item($Element) + 1)
-            } else {
-                Write-Verbose "Adding ${Element}."
-                $Dict.add($Element, 1)
-            }#>
-            
+            $InputData | % $Scriptblock            
         }
     } else {
         Write-Verbose "We have no roles..."

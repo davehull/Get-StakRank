@@ -161,7 +161,7 @@ Param(
 function Get-FieldList {
 <#
 .SYNOPSIS
-Returns the user supplied fields as a scriptblock to be used in the ranking.
+Returns the user supplied fields for use in a scriptblock to be used in the ranking.
 #>
 Param(
     [Parameter(Mandatory=$True,Position=0)]

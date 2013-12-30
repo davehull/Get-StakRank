@@ -101,6 +101,26 @@ VERBOSE: Writing out by value.
 VERBOSE: Exiting Get-Rank
 VERBOSE: Exiting Get-StakRank.ps1
 ```
-When the script completes, you're left with one tsv file (per role in the role scenario) summarizing the frequency of each Autorun for each of the -Fields you provided. Of course, if you run the script without the -RolesFile option because you don't have a naming convention you can rely on, you'll end up with a single tsv file summarizing the frequency of each Autorun across all the systems for which you have collected data.
-
+When the script completes, you're left with one tsv file (per role in the role scenario) summarizing the frequency of each Autorun for each of the -Fields you provided. Of course, if you run the script without the -RolesFile option because you don't have a naming convention you can rely on, you'll end up with a single tsv file summarizing the frequency of each Autorun across all the systems for which you have collected data. Incidentally, for those still reading, a better way to run this analysis specifically for Autoruns data would be:<br />
+```
+.\Get-Stakrank -FileNamePattern *autoruns.csv -RoleFile .\roles.txt -key -Fields "Image Path", MD5 -Verbose
+```
+By swapping the "Image Path" and MD5 fields and sorting by the key, which in this case will be the "Image Path" and MD5 tuple, rather than sorting by value, which is the frequency count, you end up with a result that shows the frequency of each entry by role with "Image Path" values clustered together, something like this:<br />
+```
+Count    Role    Image Path    MD5
+----------------------------------
+10    FIN
+7    FIN    c:\program files\hp\cissesrv\cissesrv.exe    b7de9eab067dc76047b7e46707914807
+1    FIN    c:\program files\hp\cissesrv\cissesrv.exe    bf68a382c43a5721eef03ff45faece4a
+1    FIN    c:\program files\hpwbem\storage\service\hpwmistor.exe    5534ed475c61188fffa4168f28a0d893
+1    FIN    c:\program files\hpwbem\storage\service\hpwmistor.exe    85fea3a46d528ed62e6d3ba4bd1c3fcd
+9    FIN    c:\program files\microsoft security client\antimalware\mpcmdrun.exe    180e295d3c0b0e30cab63b8a50b38122
+1    FIN    c:\program files\microsoft security client\antimalware\mpcmdrun.exe    705c190bf4a86b35c97a7622a539edd1
+1    FIN    c:\program files\microsoft security client\antimalware\msmpeng.exe    157e9e498206a3366baa7e4697bdd947
+9    FIN    c:\program files\microsoft security client\antimalware\msmpeng.exe    64e69a217d861776ca848b453fb96d71
+1    FIN    c:\program files\microsoft security client\antimalware\nissrv.exe    566ddd5d82520da01d75f81428ac4c38
+9    FIN    c:\program files\microsoft security client\antimalware\nissrv.exe    c67e39d2968400b38f54a10822e6eacf
+9    FIN    c:\program files\microsoft security client\msseces.exe    46ee88d1ee4562186987b525aefe58b6
+```
+Viewing the data this way allows you to quickly review for outliers that may be hiding as binaries with the same name as legit versions, or it could be that different hosts are running different versions of the same software. Again, the idea is lead generation for further investigation, this is a method for finding anomalies and not every anomaly is an indicator of something malicious.<br />
 Get-Stakrank is not limited to frequency analysis of Autoruns output. It should be applicable for any collection of separated values files.

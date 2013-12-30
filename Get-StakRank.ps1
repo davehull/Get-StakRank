@@ -20,8 +20,6 @@ Specifies the pattern common to the files to be ranked.
 Specifies the single character delimiter.
 .PARAMETER Header
 Specifies header values for the delimited file.
-.PARAMETER Asc
-Specifies output should be in ascending order, default.
 .PARAMETER Desc
 Specifies output should be in descending order. Ascending is default.
 .PARAMETER Key

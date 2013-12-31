@@ -125,3 +125,12 @@ Count    Role    Image Path    MD5
 Viewing the data this way allows you to quickly review for outliers that may be hiding as binaries with the same name as legit versions, or it could be that different hosts are running different versions of the same software. Again, the idea is lead generation for further investigation, this is a method for finding anomalies and not every anomaly is an indicator of something malicious.
 
 Get-Stakrank is not limited to frequency analysis of Autoruns output. It should be applicable for any collection of separated values files.
+
+####Update:
+Some have asked, "Cool story bro, but how do I go from the output of this script, back to the source machine(s) a given line of data may have come from?"
+
+Fair question. I do this using Powershell as follows:
+```
+Select-String -pattern "bf68a382c43a5721eef03ff45faece4a" *autoruns.csv
+```
+from within the directory where all my Autoruns data was stashed.

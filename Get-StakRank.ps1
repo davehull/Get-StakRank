@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
 Stacks csv/tsv input by frequency of occurence. Header and delimiter may be passed as arguments.
 Output is written to tsv files.
@@ -70,10 +70,11 @@ Param(
 )
     Write-Verbose "Entering $($MyInvocation.MyCommand)"
     $MissingFields = @()
+    Write-Debug "`$FileFields is $($FileFields -join $Delimiter)"
     foreach($Field in $UserFields) {
         Write-Debug "`$Field is $Field"
-        Write-Debug "`$FileFields is $($FileFields -join $Delimiter)"
         if ($FileFields -notcontains $Field) {
+            Write-Debug "User supplied $Field was not found."
             $MissingFields += $Field
         }
     }
@@ -200,6 +201,7 @@ Param(
 )        
     Write-Verbose "Entering $($MyInvocation.MyCommand)"
     $FieldList = Get-FieldList $Fields
+    Write-Debug "`$FieldList is $FieldList"
 
     $DictScriptblock = {
         if ($Dict.ContainsKey($Element)) {
@@ -219,23 +221,25 @@ Param(
         }
         $Outheader += $Fields -join "`t"
         $Outheader += "`r`n"
+        Write-Debug "`$Outheader is $($Outheader -replace "`t", "``t")"
         $Output = ""
         if ($Key) {
             Write-Verbose "Writing out by key."
             if ($Desc) {
-                $Output += $Dict.GetEnumerator() | Sort-Object -Desc key,value | % {[string]$_.Value + "`t" + $_.Key + "`r`n"}
+                $Output += $Dict.GetEnumerator() | Sort-Object -Desc key,value | % {[string]$_.Value + $_.Key + "`r`n"}
             } else {
-                $Output += $Dict.GetEnumerator() | Sort-Object key,value | % {[string]$_.Value + "`t" + $_.Key + "`r`n"}
+                $Output += $Dict.GetEnumerator() | Sort-Object key,value | % {[string]$_.Value + $_.Key + "`r`n"}
             }
         } else {
             Write-Verbose "Writing out by value."
             if ($Desc) {
-                $Output += $Dict.GetEnumerator() | Sort-Object -Desc value,key | % {[string]$_.Value + "`t" + $_.Key + "`r`n"}
+                $Output += $Dict.GetEnumerator() | Sort-Object -Desc value,key | % {[string]$_.Value + $_.Key + "`r`n"}
             } else {
-                $Output += $Dict.GetEnumerator() | Sort-Object value,key | % {[string]$_.value + "`t" + $_.key + "`r`n"}
+                $Output += $Dict.GetEnumerator() | Sort-Object value,key | % {[string]$_.value + $_.key + "`r`n"}
             }
         }
         $Output = $Outheader += $Output
+        Write-Debug "`$Output is $($Output -replace "`t", "``t")"
         $FieldsFileName = $Fields -join "-"
         if ($Role) {
             $Output | Set-Content -Encoding Ascii ${Role}-${FieldsFileName}.tsv

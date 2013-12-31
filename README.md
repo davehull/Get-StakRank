@@ -122,5 +122,6 @@ Count    Role    Image Path    MD5
 9    FIN    c:\program files\microsoft security client\antimalware\nissrv.exe    c67e39d2968400b38f54a10822e6eacf
 9    FIN    c:\program files\microsoft security client\msseces.exe    46ee88d1ee4562186987b525aefe58b6
 ```
-Viewing the data this way allows you to quickly review for outliers that may be hiding as binaries with the same name as legit versions, or it could be that different hosts are running different versions of the same software. Again, the idea is lead generation for further investigation, this is a method for finding anomalies and not every anomaly is an indicator of something malicious.<br />
+Viewing the data this way allows you to quickly review for outliers that may be hiding as binaries with the same name as legit versions, or it could be that different hosts are running different versions of the same software. Again, the idea is lead generation for further investigation, this is a method for finding anomalies and not every anomaly is an indicator of something malicious.
+
 Get-Stakrank is not limited to frequency analysis of Autoruns output. It should be applicable for any collection of separated values files.

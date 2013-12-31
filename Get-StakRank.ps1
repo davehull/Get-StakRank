@@ -69,12 +69,13 @@ Param(
         [Char]$Delimiter
 )
     Write-Verbose "Entering $($MyInvocation.MyCommand)"
+    Write-Debug "Parameters: `$FileFields is ${FileFields}; `$UserFields is ${UserFields}; `$Delimiter is `"$($Delimiter -replace "`t", "``t")`""
     $MissingFields = @()
     Write-Debug "`$FileFields is $($FileFields -join $Delimiter)"
     foreach($Field in $UserFields) {
         Write-Debug "`$Field is $Field"
         if ($FileFields -notcontains $Field) {
-            Write-Debug "User supplied $Field was not found."
+            Write-Debug "User supplied $Field was not found. Verify your delimiter is `"${Delimiter}`"."
             $MissingFields += $Field
         }
     }
@@ -276,10 +277,12 @@ Param(
         }
     } else {
         Write-Verbose "We have no roles..."
-        $PrefixFieldList = "`$Element = `"``t`" + "
+        # $PrefixFieldList = "`$Element = `"``t`" + "
+        $PrefixFieldList = "`$Element = `"`" + "
         $PrefixFieldList += $FieldList
         $FieldList = $PrefixFieldList
         $FieldList += $DictScriptblock
+        Write-Debug "`$FieldList is $FieldList"
         $Scriptblock = [scriptblock]::Create($FieldList)
         Write-Verbose "Processing all up."
         $InputData = @()

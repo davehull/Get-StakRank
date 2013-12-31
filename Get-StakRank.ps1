@@ -216,6 +216,7 @@ Param(
     $OutScriptblock = {
         if ($Role) {
             $Outheader = "Count`tRole`t"
+            Write-Debug "`$Outheader is $($Outheader -replace "`t", "``t")"
         } else {
             $Outheader = "Count`t"
         }
@@ -226,16 +227,16 @@ Param(
         if ($Key) {
             Write-Verbose "Writing out by key."
             if ($Desc) {
-                $Output += $Dict.GetEnumerator() | Sort-Object -Desc key,value | % {[string]$_.Value + $_.Key + "`r`n"}
+                $Output += $Dict.GetEnumerator() | Sort-Object -Desc key,value | % {[string]$_.Value + "`t" + $_.Key + "`r`n"}
             } else {
-                $Output += $Dict.GetEnumerator() | Sort-Object key,value | % {[string]$_.Value + $_.Key + "`r`n"}
+                $Output += $Dict.GetEnumerator() | Sort-Object key,value | % {[string]$_.Value + "`t" + $_.Key + "`r`n"}
             }
         } else {
             Write-Verbose "Writing out by value."
             if ($Desc) {
-                $Output += $Dict.GetEnumerator() | Sort-Object -Desc value,key | % {[string]$_.Value + $_.Key + "`r`n"}
+                $Output += $Dict.GetEnumerator() | Sort-Object -Desc value,key | % {[string]$_.Value + "`t" + $_.Key + "`r`n"}
             } else {
-                $Output += $Dict.GetEnumerator() | Sort-Object value,key | % {[string]$_.value + $_.key + "`r`n"}
+                $Output += $Dict.GetEnumerator() | Sort-Object value,key | % {[string]$_.value + "`t" + $_.key + "`r`n"}
             }
         }
         $Output = $Outheader += $Output

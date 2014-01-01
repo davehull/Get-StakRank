@@ -80,11 +80,13 @@ Param(
         }
     }
     if ($MissingFields.Length -gt 1) {
-        Write-Error "[+] Error: User supplied fields, $($MissingFields -join ", "), were not found in `n`t$($FileFields -join $Delimiter)"
+        Write-Error "[!] Error: User supplied fields, $($MissingFields -join ", "), were not found in `n`t$($FileFields -join $Delimiter)"
+        Write-Error "[!] Error: You may want to verify that you've specified the correct delimiter for the input files."
         Write-Verbose "Exiting $($MyInvocation.MyCommand)"
         exit
     } elseif ($MissingFields.Length -eq 1) {
-        Write-Error "[+] Error: User supplied field, $MissingFields, was not found in `n`t$($FileFields -join $Delimiter)"
+        Write-Error "[!] Error: User supplied field, $MissingFields, was not found in `n`t$($FileFields -join $Delimiter)"
+        Write-Error "[!] Error: You may want to verify that you've specified the correct delimiter for the input files."
         Write-Verbose "Exiting $($MyInvocation.MyCommand)"
         exit
     }
@@ -305,7 +307,11 @@ if ($RoleFile) {
     $Roles = @(Get-Roles $RoleFile)
 }
 $Files = @(Get-Files $FileNamePattern)
-$InputFileHeader = @(Get-FileHeader $Files[0] $Delimiter)
+if ($Header) {
+    $InputFileHeader = @($Header -split $Delimiter)
+} else {
+    $InputFileHeader = @(Get-FileHeader $Files[0] $Delimiter)
+}
 Check-Fields $InputFileHeader $Fields $Delimiter
 Write-Debug "User supplied fields, ${Fields}, found in input file."
 Get-Rank -Files $Files -Delimiter $Delimiter -Header $InputFileHeader -Roles $Roles -Desc $Desc -Key $Key -Fields $Fields

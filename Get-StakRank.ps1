@@ -14,6 +14,9 @@ https://github.com/davehull/Get-Fields.ps1, may be useful, alternatively, provid
 throws an error that lists the fields found in the first input file that matches the supplied
 file name pattern.
 
+More details, including a use-case scenario that explains more:
+https://github.com/davehull/Get-StakRank#get-stakrank
+
 .PARAMETER FileNamePattern
 Specifies the pattern common to the files to be ranked.
 .PARAMETER Delimiter

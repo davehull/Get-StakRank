@@ -102,7 +102,7 @@ VERBOSE: Exiting Get-Rank
 VERBOSE: Exiting Get-StakRank.ps1
 ```
 When the script completes, you're left with one tsv file (per role in the role scenario) summarizing the frequency of each Autorun for each of the -Fields you provided. Of course, if you run the script without the -RolesFile option because you don't have a naming convention you can rely on, you'll end up with a single tsv file summarizing the frequency of each Autorun across all the systems for which you have collected data. Incidentally, for those still reading, a better way to run this analysis specifically for Autoruns data would be:<br />
-```
+```Powershell
 .\Get-Stakrank -FileNamePattern *autoruns.csv -RoleFile .\roles.txt -key -Fields "Image Path", MD5 -Verbose
 ```
 By swapping the "Image Path" and MD5 fields and sorting by the key, which in this case will be the "Image Path" and MD5 tuple, rather than sorting by value, which is the frequency count, you end up with a result that shows the frequency of each entry by role with "Image Path" values clustered together, something like this:<br />
@@ -130,7 +130,7 @@ Get-Stakrank is not limited to frequency analysis of Autoruns output. It should 
 Some have asked, "Cool story bro, but how do I go from the output of this script, back to the source machine(s) a given line of data may have come from?"
 
 Fair question. I do this using Powershell as follows:
-```
+```Powershell
 Select-String -pattern "bf68a382c43a5721eef03ff45faece4a" *autoruns.csv
 ```
 from within the directory where all my Autoruns data was stashed.

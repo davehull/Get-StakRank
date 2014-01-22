@@ -138,6 +138,7 @@ Param(
     Write-Verbose "Attempting to extract input file headers from ${File}."
     $HeaderRow = gc $File -TotalCount 1
     $Fields = @($HeaderRow -split $Delimiter)
+    $Fields = $Fields -replace "`"", ""
     Write-Verbose "Extracted the following fields: $($Fields -join $Delimiter)"
     $Fields
     Write-Verbose "Exiting $($MyInvocation.MyCommand)"

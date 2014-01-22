@@ -1,4 +1,4 @@
-﻿<#
+<#
 .SYNOPSIS
 Stacks csv/tsv input by frequency of occurence. Header and delimiter may be passed as arguments.
 Output is written to tsv files.
@@ -74,6 +74,7 @@ Param(
     Write-Verbose "Entering $($MyInvocation.MyCommand)"
     Write-Debug "Parameters: `$FileFields is ${FileFields}; `$UserFields is ${UserFields}; `$Delimiter is `"$($Delimiter -replace "`t", "``t")`""
     $MissingFields = @()
+    $FileFields = $FileFields -replace "`"", ""
     Write-Debug "`$FileFields is $($FileFields -join $Delimiter)"
     foreach($Field in $UserFields) {
         Write-Debug "`$Field is $Field"
